@@ -41,8 +41,12 @@ export function Elevation({
   onDrop,
   close,
 }: {
-  /** Close up: the wall as tall as the space allows, scrolling sideways. */
-  close: boolean;
+  /**
+   * Close up: the wall as tall as the space allows, scrolling sideways.
+   * Null chooses for itself: close up only when the whole wall would be
+   * drawn much smaller than the space's height allows.
+   */
+  close: boolean | null;
   room: Room;
   rules: Rooms["rules"];
   wall: number;
@@ -61,7 +65,14 @@ export function Elevation({
   const H = room.height;
   const avail = { w: Math.max(200, width - 40), h: Math.max(200, height - 70) };
   const fit = Math.min(avail.w / (L + 1.2), avail.h / H);
-  const s = close ? Math.max(fit, avail.h / H) : fit; // px per metre
+  const tall = avail.h / H;
+  const s = (close ?? fit < 0.7 * tall) ? Math.max(fit, tall) : fit; // px per metre
+
+  // Open each wall centred.
+  useEffect(() => {
+    const el = box.current;
+    el?.scrollTo({ left: (el.scrollWidth - el.clientWidth) / 2 });
+  }, [wall, s, box]);
   const wallW = L * s;
   const wallH = H * s;
   const drag = useRef<{ id: number; dx: number; dy: number; moved: boolean } | null>(null);

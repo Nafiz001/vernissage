@@ -283,7 +283,7 @@ export function Studio({ id }: { id: string }) {
                   { v: false, label: "Whole wall" },
                   { v: true, label: "Close up" },
                 ].map((o) => (
-                  <button key={o.label} role="radio" aria-checked={(close ?? room.width > 14) === o.v} onClick={() => setClose(o.v)} className="rounded-full px-3 py-1.5 aria-checked:bg-black/80 aria-checked:text-white">
+                  <button key={o.label} role="radio" aria-checked={close === o.v} onClick={() => setClose(o.v)} className="rounded-full px-3 py-1.5 aria-checked:bg-black/80 aria-checked:text-white">
                     {o.label}
                   </button>
                 ))}
@@ -301,7 +301,7 @@ export function Studio({ id }: { id: string }) {
           <div className="min-h-0 flex-1 px-5">
             <Elevation
               room={room}
-              close={close ?? room.width > 14}
+              close={close}
               rules={rooms.data.rules}
               wall={wall}
               paint={paint}
