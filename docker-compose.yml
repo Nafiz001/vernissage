@@ -1,0 +1,54 @@
+# `docker compose up -d db` gives development a database.
+# `docker compose --profile full up --build` runs everything behind Caddy
+# at http://localhost:8080.
+services:
+  db:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_USER: vernissage
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-vernissage}
+      POSTGRES_DB: vernissage
+    ports:
+      - "5491:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "vernissage"]
+      interval: 2s
+      retries: 30
+
+  server:
+    profiles: [full]
+    build: ./server
+    environment:
+      DATABASE_URL: postgres://vernissage:${POSTGRES_PASSWORD:-vernissage}@db:5432/vernissage?sslmode=disable
+      VERNISSAGE_ADDR: 0.0.0.0:8790
+      VERNISSAGE_CACHE: /data/cache
+      VERNISSAGE_ORIGINS: http://localhost:8080
+      VERNISSAGE_SYNC_EVERY: 168h
+    volumes:
+      - cache:/data
+    depends_on:
+      db:
+        condition: service_healthy
+
+  web:
+    profiles: [full]
+    build: ./web
+    environment:
+      VERNISSAGE_API: http://server:8790
+      NEXT_PUBLIC_SITE_URL: http://localhost:8080
+    depends_on: [server]
+
+  caddy:
+    profiles: [full]
+    image: caddy:2-alpine
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+    depends_on: [server, web]
+
+volumes:
+  pgdata:
+  cache:

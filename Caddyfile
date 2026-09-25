@@ -1,0 +1,14 @@
+# One origin for the browser: the Go server answers the API, the live rooms
+# and every picture; Next.js renders the pages.
+:8080 {
+	encode zstd gzip
+
+	@server path /api/* /ws/* /img/* /dzi/* /poster/*
+	handle @server {
+		reverse_proxy server:8790
+	}
+
+	handle {
+		reverse_proxy web:3790
+	}
+}

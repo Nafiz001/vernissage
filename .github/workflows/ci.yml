@@ -1,0 +1,64 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  server:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: server
+    services:
+      postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_USER: vernissage
+          POSTGRES_PASSWORD: vernissage
+          POSTGRES_DB: vernissage_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U vernissage"
+          --health-interval 2s --health-retries 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: server/go.mod
+          cache-dependency-path: server/go.sum
+
+      - name: Formatting
+        run: test -z "$(gofmt -l .)"
+
+      - name: Vet
+        run: go vet ./...
+
+      # Unit tests, and integration tests against a real PostgreSQL: the
+      # whole HTTP API, the job queue under contention, and two people in a
+      # live room over real WebSockets.
+      - name: Test
+        env:
+          VERNISSAGE_TEST_DATABASE_URL: postgres://vernissage:vernissage@localhost:5432/vernissage_test?sslmode=disable
+        run: go test -race -count=1 ./...
+
+      - name: Build
+        run: CGO_ENABLED=0 go build -trimpath -o /dev/null ./cmd/vernissage
+
+  web:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm run build

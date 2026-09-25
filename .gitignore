@@ -1,0 +1,13 @@
+# local database, logs and caches
+.dev/
+server/bin/
+server/data/
+*.exe
+
+# web (see also web/.gitignore)
+web/node_modules/
+web/.next/
+
+.env
+.env.local
+.DS_Store
