@@ -13,8 +13,11 @@ const EMOJI: Record<string, string> = { clap: "👏", heart: "❤️", wow: "�
 function Figure({ peer }: { peer: Peer }) {
   const group = useRef<THREE.Group>(null);
   const body = useRef<THREE.Group>(null);
-  const reactions = useWalk((s) => s.reactions.filter((r) => r.peer === peer.id));
-  const colour = `hsl(${peer.hue} 45% 58%)`;
+  // Select the store's own array; filtering inside the selector would hand
+  // back a new array on every read and render forever.
+  const reactions = useWalk((s) => s.reactions).filter((r) => r.peer === peer.id);
+  // three.js parses only the comma form of hsl().
+  const colour = `hsl(${peer.hue}, 62%, 44%)`;
 
   useFrame((_, dt) => {
     const m = live.peers.get(peer.id);
@@ -38,16 +41,17 @@ function Figure({ peer }: { peer: Peer }) {
   return (
     <group ref={group}>
       <group ref={body}>
-        <mesh position={[0, 0.78, 0]} castShadow>
+        {/* Standing on the floor: a capsule's half-length plus its radius. */}
+        <mesh position={[0, 0.65, 0]} castShadow>
           <capsuleGeometry args={[0.2, 0.9, 6, 16]} />
-          <meshStandardMaterial color={colour} roughness={0.55} />
+          <meshStandardMaterial color={colour} roughness={0.45} />
         </mesh>
-        <mesh position={[0, 1.52, 0]} castShadow>
+        <mesh position={[0, 1.5, 0]} castShadow>
           <sphereGeometry args={[0.14, 20, 16]} />
-          <meshStandardMaterial color={colour} roughness={0.5} />
+          <meshStandardMaterial color={colour} roughness={0.4} />
         </mesh>
         {/* Which way they're facing. */}
-        <mesh position={[0, 1.54, -0.13]}>
+        <mesh position={[0, 1.52, -0.13]}>
           <sphereGeometry args={[0.035, 10, 8]} />
           <meshStandardMaterial color="#1d1a16" />
         </mesh>
@@ -56,13 +60,13 @@ function Figure({ peer }: { peer: Peer }) {
         <planeGeometry args={[0.9, 0.9]} />
         <meshBasicMaterial map={blobTexture()} transparent depthWrite={false} />
       </mesh>
-      <Billboard position={[0, 1.92, 0]}>
+      <Billboard position={[0, 1.86, 0]}>
         <Text font="/fonts/Archivo-Medium.ttf" fontSize={0.1} color="#ffffff" outlineWidth={0.012} outlineColor="#1d1a16" anchorY="bottom">
           {peer.name}
         </Text>
       </Billboard>
       {reactions.map((r) => (
-        <Html key={r.key} position={[0, 2.1, 0]} center zIndexRange={[20, 0]}>
+        <Html key={r.key} position={[0, 2.05, 0]} center zIndexRange={[20, 0]}>
           <span className="walk-float pointer-events-none block select-none text-[34px]">{EMOJI[r.e]}</span>
         </Html>
       ))}
