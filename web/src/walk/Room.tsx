@@ -195,7 +195,7 @@ export function RoomShell({ room, e, quality, light }: { room: RoomSpec; e: Exhi
         )}
       </group>
 
-      {room.benches.map((b, i) => (
+      {(room.benches ?? []).map((b, i) => (
         <Bench key={i} x={b.x} z={b.z} w={b.width} d={b.depth} />
       ))}
     </group>

@@ -8,6 +8,15 @@ import (
 func f(v float64) *float64 { return &v }
 func i(v int) *int         { return &v }
 
+// The browser maps over every room's benches; none may be null in JSON.
+func TestRoomsHaveBenchLists(t *testing.T) {
+	for _, r := range Rooms {
+		if r.Benches == nil {
+			t.Errorf("%s has a nil bench list", r.Key)
+		}
+	}
+}
+
 func TestFramingFollowsTheWork(t *testing.T) {
 	cases := []struct {
 		name  string

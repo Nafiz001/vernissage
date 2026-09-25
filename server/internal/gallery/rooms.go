@@ -59,8 +59,9 @@ var Rooms = []Room{
 	},
 	{
 		Key: "cabinet", Name: "Cabinet", Width: 7, Depth: 6, Height: 3.6,
-		Blurb: "A small, close room for prints, drawings and little panels.",
-		Door:  Door{Width: 1.4, Height: 2.6},
+		Blurb:   "A small, close room for prints, drawings and little panels.",
+		Door:    Door{Width: 1.4, Height: 2.6},
+		Benches: []Bench{},
 	},
 	{
 		Key: "cube", Name: "White cube", Width: 12, Depth: 12, Height: 4.2,

@@ -91,7 +91,7 @@ export function walkable(room: Room) {
     { x0: -hall + m, x1: hall - m, z0: hd + WALL_T + m, z1: hd + VESTIBULE - m },
     { x0: -room.door.width / 2 + m, x1: room.door.width / 2 - m, z0: hd - m - 0.01, z1: hd + WALL_T + m + 0.01 },
   ];
-  const blocked: Rect[] = room.benches.map((b) => ({
+  const blocked: Rect[] = (room.benches ?? []).map((b) => ({
     x0: b.x - b.width / 2 - 0.3,
     x1: b.x + b.width / 2 + 0.3,
     z0: b.z - b.depth / 2 - 0.3,

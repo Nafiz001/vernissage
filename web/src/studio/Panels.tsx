@@ -166,7 +166,7 @@ export function Plan({ room, wall, onWall, placements, works }: { room: Room; wa
         const [x2, y2] = at(p.wall, p.x + a.hang.w / 2);
         return <line key={p.artworkId} x1={x1} y1={y1} x2={x2} y2={y2} stroke="#1d1a16" strokeWidth={3} />;
       })}
-      {room.benches.map((b, i) => (
+      {(room.benches ?? []).map((b, i) => (
         <rect key={i} x={(b.x - b.width / 2 + room.width / 2) * s} y={(b.z - b.depth / 2 + room.depth / 2) * s} width={b.width * s} height={b.depth * s} fill="rgba(0,0,0,.2)" />
       ))}
     </svg>
