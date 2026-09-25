@@ -186,11 +186,12 @@ func visitorFrom(r *http.Request) string {
 }
 
 func clientIP(r *http.Request) string {
-	// Behind the bundled Caddy (or the Next dev proxy) the socket is the
-	// proxy's; it passes the browser's address along.
+	// Behind Caddy (or Next's dev proxy) the socket is the proxy's, and it
+	// appends the browser's address to X-Forwarded-For. Only that last
+	// entry is trustworthy: anything before it came from the client.
 	if xf := r.Header.Get("X-Forwarded-For"); xf != "" {
-		if i := strings.IndexByte(xf, ','); i >= 0 {
-			xf = xf[:i]
+		if i := strings.LastIndexByte(xf, ','); i >= 0 {
+			xf = xf[i+1:]
 		}
 		return strings.TrimSpace(xf)
 	}
@@ -199,6 +200,21 @@ func clientIP(r *http.Request) string {
 		return r.RemoteAddr
 	}
 	return host
+}
+
+// internal is a request from the web server rendering a page (no proxy
+// header, from this machine or the private network), which shouldn't
+// share one rate-limit bucket on behalf of every visitor.
+func internal(r *http.Request) bool {
+	if r.Header.Get("X-Forwarded-For") != "" {
+		return false
+	}
+	host, _, err := net.SplitHostPort(r.RemoteAddr)
+	if err != nil {
+		return false
+	}
+	ip := net.ParseIP(host)
+	return ip != nil && (ip.IsLoopback() || ip.IsPrivate())
 }
 
 type recorder struct {
@@ -245,7 +261,7 @@ func (s *Server) middleware(next http.Handler) http.Handler {
 		if unsafe {
 			limiter = s.writeLimit
 		}
-		if !limiter.Allow(clientIP(r)) {
+		if (unsafe || !internal(r)) && !limiter.Allow(clientIP(r)) {
 			rec.Header().Set("Retry-After", "10")
 			writeJSON(rec, http.StatusTooManyRequests, map[string]any{"error": map[string]any{"message": "Too many requests. Wait a few seconds and try again."}})
 			return
