@@ -6,11 +6,11 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/nafizahmed/vernissage/server/internal/color"
-	"github.com/nafizahmed/vernissage/server/internal/colorindex"
-	"github.com/nafizahmed/vernissage/server/internal/gallery"
-	"github.com/nafizahmed/vernissage/server/internal/jobs"
-	"github.com/nafizahmed/vernissage/server/internal/store"
+	"github.com/Nafiz001/vernissage/server/internal/color"
+	"github.com/Nafiz001/vernissage/server/internal/colorindex"
+	"github.com/Nafiz001/vernissage/server/internal/gallery"
+	"github.com/Nafiz001/vernissage/server/internal/jobs"
+	"github.com/Nafiz001/vernissage/server/internal/store"
 )
 
 func (s *Server) stats(w http.ResponseWriter, r *http.Request) error {

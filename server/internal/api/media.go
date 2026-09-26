@@ -14,11 +14,11 @@ import (
 	"github.com/coder/websocket"
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	"github.com/nafizahmed/vernissage/server/internal/gallery"
-	"github.com/nafizahmed/vernissage/server/internal/imaging"
-	"github.com/nafizahmed/vernissage/server/internal/live"
-	"github.com/nafizahmed/vernissage/server/internal/pipeline"
-	"github.com/nafizahmed/vernissage/server/internal/store"
+	"github.com/Nafiz001/vernissage/server/internal/gallery"
+	"github.com/Nafiz001/vernissage/server/internal/imaging"
+	"github.com/Nafiz001/vernissage/server/internal/live"
+	"github.com/Nafiz001/vernissage/server/internal/pipeline"
+	"github.com/Nafiz001/vernissage/server/internal/store"
 )
 
 // source looks up where a work's pictures live, remembering the answer:

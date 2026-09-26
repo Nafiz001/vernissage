@@ -27,7 +27,7 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	"github.com/nafizahmed/vernissage/server/internal/color"
+	"github.com/Nafiz001/vernissage/server/internal/color"
 )
 
 const (

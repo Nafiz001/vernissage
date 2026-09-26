@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/nafizahmed/vernissage/server/internal/jobs"
-	"github.com/nafizahmed/vernissage/server/internal/testdb"
+	"github.com/Nafiz001/vernissage/server/internal/jobs"
+	"github.com/Nafiz001/vernissage/server/internal/testdb"
 )
 
 func TestDedupe(t *testing.T) {

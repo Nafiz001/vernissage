@@ -13,8 +13,8 @@ import (
 	"github.com/jackc/pgx/v5"
 	"golang.org/x/text/unicode/norm"
 
-	"github.com/nafizahmed/vernissage/server/internal/db"
-	"github.com/nafizahmed/vernissage/server/internal/gallery"
+	"github.com/Nafiz001/vernissage/server/internal/db"
+	"github.com/Nafiz001/vernissage/server/internal/gallery"
 )
 
 type Exhibition struct {

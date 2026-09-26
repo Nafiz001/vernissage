@@ -8,9 +8,9 @@ import (
 	"net/mail"
 	"strings"
 
-	"github.com/nafizahmed/vernissage/server/internal/auth"
-	"github.com/nafizahmed/vernissage/server/internal/live"
-	"github.com/nafizahmed/vernissage/server/internal/store"
+	"github.com/Nafiz001/vernissage/server/internal/auth"
+	"github.com/Nafiz001/vernissage/server/internal/live"
+	"github.com/Nafiz001/vernissage/server/internal/store"
 )
 
 type userJSON struct {

@@ -11,10 +11,10 @@ import (
 
 	"github.com/jackc/pgx/v5"
 
-	"github.com/nafizahmed/vernissage/server/internal/gallery"
-	"github.com/nafizahmed/vernissage/server/internal/live"
-	"github.com/nafizahmed/vernissage/server/internal/pipeline"
-	"github.com/nafizahmed/vernissage/server/internal/store"
+	"github.com/Nafiz001/vernissage/server/internal/gallery"
+	"github.com/Nafiz001/vernissage/server/internal/live"
+	"github.com/Nafiz001/vernissage/server/internal/pipeline"
+	"github.com/Nafiz001/vernissage/server/internal/store"
 )
 
 // loadExhibition finds an exhibition the viewer may see: published ones,

@@ -5,7 +5,7 @@ import (
 	"image/color"
 	"testing"
 
-	"github.com/nafizahmed/vernissage/server/internal/gallery"
+	"github.com/Nafiz001/vernissage/server/internal/gallery"
 )
 
 func TestRender(t *testing.T) {

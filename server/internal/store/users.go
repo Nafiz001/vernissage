@@ -9,7 +9,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 
-	"github.com/nafizahmed/vernissage/server/internal/db"
+	"github.com/Nafiz001/vernissage/server/internal/db"
 )
 
 type User struct {

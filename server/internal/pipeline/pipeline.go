@@ -16,15 +16,15 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	"github.com/nafizahmed/vernissage/server/internal/color"
-	"github.com/nafizahmed/vernissage/server/internal/colorindex"
-	"github.com/nafizahmed/vernissage/server/internal/db"
-	"github.com/nafizahmed/vernissage/server/internal/gallery"
-	"github.com/nafizahmed/vernissage/server/internal/imaging"
-	"github.com/nafizahmed/vernissage/server/internal/jobs"
-	"github.com/nafizahmed/vernissage/server/internal/museum"
-	"github.com/nafizahmed/vernissage/server/internal/poster"
-	"github.com/nafizahmed/vernissage/server/internal/store"
+	"github.com/Nafiz001/vernissage/server/internal/color"
+	"github.com/Nafiz001/vernissage/server/internal/colorindex"
+	"github.com/Nafiz001/vernissage/server/internal/db"
+	"github.com/Nafiz001/vernissage/server/internal/gallery"
+	"github.com/Nafiz001/vernissage/server/internal/imaging"
+	"github.com/Nafiz001/vernissage/server/internal/jobs"
+	"github.com/Nafiz001/vernissage/server/internal/museum"
+	"github.com/Nafiz001/vernissage/server/internal/poster"
+	"github.com/Nafiz001/vernissage/server/internal/store"
 )
 
 const (

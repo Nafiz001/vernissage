@@ -42,7 +42,7 @@ func Load() Config {
 		Secure:      env("VERNISSAGE_SECURE_COOKIES", "false") == "true",
 		Workers:     envInt("VERNISSAGE_WORKERS", 6),
 		SyncEvery:   envDuration("VERNISSAGE_SYNC_EVERY", 0),
-		UserAgent:   env("VERNISSAGE_USER_AGENT", "Vernissage/1.0 (+https://github.com/nafizahmed/vernissage)"),
+		UserAgent:   env("VERNISSAGE_USER_AGENT", "Vernissage/1.0 (+https://github.com/Nafiz001/vernissage)"),
 	}
 }
 

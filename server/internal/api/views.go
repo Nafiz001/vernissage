@@ -4,9 +4,9 @@ import (
 	"context"
 	"time"
 
-	"github.com/nafizahmed/vernissage/server/internal/gallery"
-	"github.com/nafizahmed/vernissage/server/internal/museum"
-	"github.com/nafizahmed/vernissage/server/internal/store"
+	"github.com/Nafiz001/vernissage/server/internal/gallery"
+	"github.com/Nafiz001/vernissage/server/internal/museum"
+	"github.com/Nafiz001/vernissage/server/internal/store"
 )
 
 type museumJSON struct {

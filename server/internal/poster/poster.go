@@ -17,8 +17,8 @@ import (
 	"golang.org/x/image/font/opentype"
 	"golang.org/x/image/math/fixed"
 
-	"github.com/nafizahmed/vernissage/server/internal/color"
-	"github.com/nafizahmed/vernissage/server/internal/gallery"
+	"github.com/Nafiz001/vernissage/server/internal/color"
+	"github.com/Nafiz001/vernissage/server/internal/gallery"
 )
 
 //go:embed fonts/BodoniModa-Regular.ttf

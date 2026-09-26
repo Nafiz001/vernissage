@@ -24,7 +24,7 @@ export function SiteFooter() {
           <Link href="/studio" className="hover:underline">Your exhibitions</Link>
         </nav>
         <div className="flex flex-col gap-2 text-[var(--soft)]">
-          <a href="https://github.com/nafizahmed/vernissage" className="hover:underline">Source code</a>
+          <a href="https://github.com/Nafiz001/vernissage" className="hover:underline">Source code</a>
           <span>Type set in Bodoni Moda and Archivo</span>
         </div>
       </div>

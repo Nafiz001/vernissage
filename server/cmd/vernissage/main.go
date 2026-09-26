@@ -23,17 +23,17 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	"github.com/nafizahmed/vernissage/server/internal/api"
-	"github.com/nafizahmed/vernissage/server/internal/colorindex"
-	"github.com/nafizahmed/vernissage/server/internal/config"
-	"github.com/nafizahmed/vernissage/server/internal/db"
-	"github.com/nafizahmed/vernissage/server/internal/imaging"
-	"github.com/nafizahmed/vernissage/server/internal/jobs"
-	"github.com/nafizahmed/vernissage/server/internal/live"
-	"github.com/nafizahmed/vernissage/server/internal/museum"
-	"github.com/nafizahmed/vernissage/server/internal/pipeline"
-	"github.com/nafizahmed/vernissage/server/internal/seed"
-	"github.com/nafizahmed/vernissage/server/internal/store"
+	"github.com/Nafiz001/vernissage/server/internal/api"
+	"github.com/Nafiz001/vernissage/server/internal/colorindex"
+	"github.com/Nafiz001/vernissage/server/internal/config"
+	"github.com/Nafiz001/vernissage/server/internal/db"
+	"github.com/Nafiz001/vernissage/server/internal/imaging"
+	"github.com/Nafiz001/vernissage/server/internal/jobs"
+	"github.com/Nafiz001/vernissage/server/internal/live"
+	"github.com/Nafiz001/vernissage/server/internal/museum"
+	"github.com/Nafiz001/vernissage/server/internal/pipeline"
+	"github.com/Nafiz001/vernissage/server/internal/seed"
+	"github.com/Nafiz001/vernissage/server/internal/store"
 )
 
 func main() {

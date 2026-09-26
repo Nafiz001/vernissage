@@ -3,7 +3,7 @@ package colorindex
 import (
 	"testing"
 
-	"github.com/nafizahmed/vernissage/server/internal/color"
+	"github.com/Nafiz001/vernissage/server/internal/color"
 )
 
 func swatch(hex string, w float64) color.Swatch {

@@ -15,8 +15,8 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	"github.com/nafizahmed/vernissage/server/internal/color"
-	"github.com/nafizahmed/vernissage/server/internal/db"
+	"github.com/Nafiz001/vernissage/server/internal/color"
+	"github.com/Nafiz001/vernissage/server/internal/db"
 )
 
 // Tests in different packages run in parallel processes against one

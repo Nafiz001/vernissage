@@ -1,4 +1,4 @@
-module github.com/nafizahmed/vernissage/server
+module github.com/Nafiz001/vernissage/server
 
 go 1.26.0
 

@@ -13,13 +13,13 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	"github.com/nafizahmed/vernissage/server/internal/auth"
-	"github.com/nafizahmed/vernissage/server/internal/color"
-	"github.com/nafizahmed/vernissage/server/internal/colorindex"
-	"github.com/nafizahmed/vernissage/server/internal/gallery"
-	"github.com/nafizahmed/vernissage/server/internal/live"
-	"github.com/nafizahmed/vernissage/server/internal/pipeline"
-	"github.com/nafizahmed/vernissage/server/internal/store"
+	"github.com/Nafiz001/vernissage/server/internal/auth"
+	"github.com/Nafiz001/vernissage/server/internal/color"
+	"github.com/Nafiz001/vernissage/server/internal/colorindex"
+	"github.com/Nafiz001/vernissage/server/internal/gallery"
+	"github.com/Nafiz001/vernissage/server/internal/live"
+	"github.com/Nafiz001/vernissage/server/internal/pipeline"
+	"github.com/Nafiz001/vernissage/server/internal/store"
 )
 
 // DemoEmail and DemoPassword sign in as the first curator, to try the

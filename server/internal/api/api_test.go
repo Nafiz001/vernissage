@@ -15,13 +15,13 @@ import (
 	"github.com/coder/websocket"
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	"github.com/nafizahmed/vernissage/server/internal/api"
-	"github.com/nafizahmed/vernissage/server/internal/colorindex"
-	"github.com/nafizahmed/vernissage/server/internal/config"
-	"github.com/nafizahmed/vernissage/server/internal/imaging"
-	"github.com/nafizahmed/vernissage/server/internal/live"
-	"github.com/nafizahmed/vernissage/server/internal/pipeline"
-	"github.com/nafizahmed/vernissage/server/internal/testdb"
+	"github.com/Nafiz001/vernissage/server/internal/api"
+	"github.com/Nafiz001/vernissage/server/internal/colorindex"
+	"github.com/Nafiz001/vernissage/server/internal/config"
+	"github.com/Nafiz001/vernissage/server/internal/imaging"
+	"github.com/Nafiz001/vernissage/server/internal/live"
+	"github.com/Nafiz001/vernissage/server/internal/pipeline"
+	"github.com/Nafiz001/vernissage/server/internal/testdb"
 )
 
 type env struct {
