@@ -1,6 +1,7 @@
 # One origin for the browser: the Go server answers the API, the live rooms
-# and every picture; Next.js renders the pages.
-:8080 {
+# and every picture; Next.js renders the pages. SITE_ADDRESS is a domain
+# (HTTPS, certificates managed by Caddy) or ":8080" (plain HTTP).
+{$SITE_ADDRESS} {
 	encode zstd gzip
 
 	@server path /api/* /ws/* /img/* /dzi/* /poster/*

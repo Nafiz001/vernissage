@@ -7,7 +7,9 @@ FROM node:22-alpine AS build
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-ENV NEXT_OUTPUT=standalone NEXT_TELEMETRY_DISABLED=1
+# Absolute links in share cards are fixed at build time.
+ARG NEXT_PUBLIC_SITE_URL=http://localhost:8080
+ENV NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL NEXT_OUTPUT=standalone NEXT_TELEMETRY_DISABLED=1
 RUN npm run build
 
 FROM node:22-alpine

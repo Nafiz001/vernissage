@@ -1,15 +1,21 @@
-# `docker compose up -d db` gives development a database.
-# `docker compose --profile full up --build` runs everything behind Caddy
-# at http://localhost:8080.
+# Development: `docker compose up -d db` gives you a database on :5491.
+#
+# Production: put SITE_ADDRESS, PUBLIC_URL, POSTGRES_PASSWORD and
+# SECURE_COOKIES in a .env file beside this one (see .env.example), then
+# `docker compose --profile full up -d --build`. Caddy serves the site on
+# SITE_ADDRESS: a domain name gets HTTPS automatically; ":8080" serves
+# plain HTTP on port 8080 for trying it locally.
 services:
   db:
     image: postgres:18-alpine
+    restart: unless-stopped
     environment:
       POSTGRES_USER: vernissage
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-vernissage}
       POSTGRES_DB: vernissage
     ports:
-      - "5491:5432"
+      # Only this machine can reach the database.
+      - "127.0.0.1:5491:5432"
     volumes:
       - pgdata:/var/lib/postgresql
     healthcheck:
@@ -20,11 +26,13 @@ services:
   server:
     profiles: [full]
     build: ./server
+    restart: unless-stopped
     environment:
       DATABASE_URL: postgres://vernissage:${POSTGRES_PASSWORD:-vernissage}@db:5432/vernissage?sslmode=disable
       VERNISSAGE_ADDR: 0.0.0.0:8790
       VERNISSAGE_CACHE: /data/cache
-      VERNISSAGE_ORIGINS: http://localhost:8080
+      VERNISSAGE_ORIGINS: ${PUBLIC_URL:-http://localhost:8080}
+      VERNISSAGE_SECURE_COOKIES: ${SECURE_COOKIES:-false}
       VERNISSAGE_SYNC_EVERY: 168h
     volumes:
       - cache:/data
@@ -34,21 +42,33 @@ services:
 
   web:
     profiles: [full]
-    build: ./web
+    build:
+      context: ./web
+      args:
+        NEXT_PUBLIC_SITE_URL: ${PUBLIC_URL:-http://localhost:8080}
+    restart: unless-stopped
     environment:
       VERNISSAGE_API: http://server:8790
-      NEXT_PUBLIC_SITE_URL: http://localhost:8080
     depends_on: [server]
 
   caddy:
     profiles: [full]
     image: caddy:2-alpine
+    restart: unless-stopped
+    environment:
+      SITE_ADDRESS: ${SITE_ADDRESS:-:8080}
     ports:
+      - "80:80"
+      - "443:443"
       - "8080:8080"
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
     depends_on: [server, web]
 
 volumes:
   pgdata:
   cache:
+  caddy_data:
+  caddy_config:
