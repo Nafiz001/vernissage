@@ -32,7 +32,7 @@ A *vernissage* is an exhibition's opening night.
 ```console
 $ make setup          # Go modules and npm packages
 $ make db             # PostgreSQL 18 in Docker on :5491
-$ make ingest         # read both museums (about 20 minutes)
+$ make ingest         # read both museums (about 80 minutes; the Met is read slowly)
 $ make dev            # API on :8790, site on :3790
 $ make seed           # once the pictures are analysed: six exhibitions
 ```
