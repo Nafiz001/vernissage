@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"net/http/cookiejar"
@@ -32,6 +33,10 @@ type env struct {
 }
 
 func setup(t *testing.T) *env {
+	return setupWith(t, config.Config{Origins: []string{"http://example.test"}})
+}
+
+func setupWith(t *testing.T, cfg config.Config) *env {
 	pool := testdb.Open(t)
 	ids := testdb.Insert(t, pool,
 		testdb.Work{Title: "The Great Wave", Artist: "Katsushika Hokusai", Kind: "print", Year: 1831, WidthCM: 37.9, HeightCM: 25.7, Colors: []string{"#e8e2d0", "#1f4f8f"}},
@@ -44,11 +49,10 @@ func setup(t *testing.T) *env {
 	if err := index.Load(context.Background(), pool); err != nil {
 		t.Fatal(err)
 	}
-	images, err := imaging.New(t.TempDir(), "test")
+	images, err := imaging.New(t.TempDir(), "test", 0)
 	if err != nil {
 		t.Fatal(err)
 	}
-	cfg := config.Config{Origins: []string{"http://example.test"}}
 	hub := live.NewHub(api.Guestbook{Pool: pool})
 	pipe := pipeline.New(pool, images, "test", 0)
 	srv := httptest.NewServer(api.New(cfg, pool, images, index, hub, pipe).Handler())
@@ -452,5 +456,60 @@ func TestLiveRoom(t *testing.T) {
 	_, _, err := websocket.Dial(ctx, wsURL, &websocket.DialOptions{HTTPHeader: http.Header{"Origin": {"https://evil.test"}}})
 	if err == nil {
 		t.Error("cross-origin WebSocket accepted")
+	}
+}
+
+// With Cloudinary configured, pictures redirect to its fetch CDN and deep
+// zoom tiles are off.
+func TestCloudinaryPictures(t *testing.T) {
+	e := setupWith(t, config.Config{Origins: []string{"http://example.test"}, Cloudinary: "demo-cloud"})
+	client := &http.Client{CheckRedirect: func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }}
+	resp, err := client.Get(fmt.Sprintf("%s/img/%d/800.jpg", e.srv.URL, e.ids[0]))
+	if err != nil {
+		t.Fatal(err)
+	}
+	resp.Body.Close()
+	want := "https://res.cloudinary.com/demo-cloud/image/fetch/c_limit,w_800,q_auto,f_auto/https://example.org/a.jpg"
+	if resp.StatusCode != 302 || resp.Header.Get("Location") != want {
+		t.Errorf("800 px: %d %s", resp.StatusCode, resp.Header.Get("Location"))
+	}
+	resp, _ = client.Get(fmt.Sprintf("%s/img/%d/2400.jpg", e.srv.URL, e.ids[0]))
+	resp.Body.Close()
+	if !strings.HasSuffix(resp.Header.Get("Location"), "/https://example.org/b.jpg") {
+		t.Errorf("2400 px should come from the large picture: %s", resp.Header.Get("Location"))
+	}
+	resp, _ = client.Get(fmt.Sprintf("%s/dzi/%d.dzi", e.srv.URL, e.ids[0]))
+	resp.Body.Close()
+	if resp.StatusCode != 404 {
+		t.Errorf("deep zoom descriptor: %d", resp.StatusCode)
+	}
+}
+
+// A page on another domain gets a ticket through the API and opens the
+// room with it; the room knows who they are without cookies.
+func TestLiveTicket(t *testing.T) {
+	e := setup(t)
+	ada := e.browser()
+	ada.signup("Ada", "ada@example.test")
+	var d detail
+	ada.do("POST", "/api/exhibitions", map[string]any{"title": "Draft", "artworkIds": e.ids[:1]}, &d)
+	var tk struct{ Ticket string }
+	ada.do("GET", "/api/live-ticket", nil, &tk)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	url := "ws" + strings.TrimPrefix(e.srv.URL, "http") + "/ws/exhibitions/" + d.Exhibition.Slug
+	// No cookies at all: a plain dialer, as a browser on another site.
+	c, _, err := websocket.Dial(ctx, url+"?ticket="+tk.Ticket, &websocket.DialOptions{HTTPHeader: http.Header{"Origin": {"http://example.test"}}})
+	if err != nil {
+		t.Fatalf("with ticket (a draft only Ada may enter): %v", err)
+	}
+	defer c.CloseNow()
+	_, data, err := c.Read(ctx)
+	if err != nil || !strings.Contains(string(data), `"name":"Ada"`) {
+		t.Errorf("welcome %s %v", data, err)
+	}
+	if _, _, err := websocket.Dial(ctx, url+"?ticket=forged.ticket", &websocket.DialOptions{HTTPHeader: http.Header{"Origin": {"http://example.test"}}}); err == nil {
+		t.Error("a forged ticket opened the room")
 	}
 }

@@ -46,6 +46,7 @@ type Server struct {
 	readLimit  *auth.Limiter
 
 	sources sync.Map // artwork id -> imaging.Source
+	tickets tickets
 	log     *slog.Logger
 }
 
@@ -55,6 +56,7 @@ func New(cfg config.Config, pool *pgxpool.Pool, images *imaging.Service, index *
 		authLimit:  auth.NewLimiter(10, 10),
 		writeLimit: auth.NewLimiter(120, 60),
 		readLimit:  auth.NewLimiter(900, 300),
+		tickets:    newTickets(cfg.Secret),
 		log:        slog.With("component", "api"),
 	}
 }
@@ -98,6 +100,7 @@ func (s *Server) Handler() http.Handler {
 	route("POST /api/exhibitions/{ref}/visit", s.visit)
 	route("GET /api/users/{handle}", s.getUser)
 
+	route("GET /api/live-ticket", s.liveTicket)
 	route("GET /ws/exhibitions/{ref}", s.walk)
 
 	route("GET /img/{id}/{file}", s.image)
@@ -185,15 +188,18 @@ func visitorFrom(r *http.Request) string {
 	return v
 }
 
-func clientIP(r *http.Request) string {
-	// Behind Caddy (or Next's dev proxy) the socket is the proxy's, and it
-	// appends the browser's address to X-Forwarded-For. Only that last
-	// entry is trustworthy: anything before it came from the client.
+func (s *Server) clientIP(r *http.Request) string {
+	return forwardedFor(r, s.cfg.ProxyHops)
+}
+
+// forwardedFor finds the browser's address. Each proxy in front of the
+// server appends the address it was connected from to X-Forwarded-For, so
+// with n proxies of our own the browser is n entries from the end; anything
+// before that came from the client and can't be trusted.
+func forwardedFor(r *http.Request, hops int) string {
 	if xf := r.Header.Get("X-Forwarded-For"); xf != "" {
-		if i := strings.LastIndexByte(xf, ','); i >= 0 {
-			xf = xf[i+1:]
-		}
-		return strings.TrimSpace(xf)
+		parts := strings.Split(xf, ",")
+		return strings.TrimSpace(parts[max(0, len(parts)-hops)])
 	}
 	host, _, err := net.SplitHostPort(r.RemoteAddr)
 	if err != nil {
@@ -261,7 +267,7 @@ func (s *Server) middleware(next http.Handler) http.Handler {
 		if unsafe {
 			limiter = s.writeLimit
 		}
-		if (unsafe || !internal(r)) && !limiter.Allow(clientIP(r)) {
+		if (unsafe || !internal(r)) && !limiter.Allow(s.clientIP(r)) {
 			rec.Header().Set("Retry-After", "10")
 			writeJSON(rec, http.StatusTooManyRequests, map[string]any{"error": map[string]any{"message": "Too many requests. Wait a few seconds and try again."}})
 			return

@@ -82,6 +82,19 @@ func (s *Server) image(w http.ResponseWriter, r *http.Request) error {
 	if err != nil {
 		return imageError(err)
 	}
+	if s.cfg.Cloudinary != "" {
+		// Cloudinary fetches the museum's picture once, resizes it and
+		// serves it from its CDN; browsers remember the redirect.
+		from := src.ImageURL
+		if width > 1200 {
+			from = src.LargeURL
+		}
+		w.Header().Set("Cache-Control", "public, max-age=604800")
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		http.Redirect(w, r, fmt.Sprintf("https://res.cloudinary.com/%s/image/fetch/c_limit,w_%d,q_auto,f_auto/%s",
+			s.cfg.Cloudinary, width, from), http.StatusFound)
+		return nil
+	}
 	p, err := s.images.Sized(r.Context(), src, width)
 	if err != nil {
 		return imageError(err)
@@ -90,6 +103,11 @@ func (s *Server) image(w http.ResponseWriter, r *http.Request) error {
 }
 
 func (s *Server) dziDescriptor(w http.ResponseWriter, r *http.Request) error {
+	if s.cfg.Cloudinary != "" {
+		// No tiles without a disk to cut them on; the viewer falls back to
+		// one large picture.
+		return fail(http.StatusNotFound, "Deep zoom tiles are off on this server.")
+	}
 	id, err := strconv.ParseInt(strings.TrimSuffix(r.PathValue("file"), ".dzi"), 10, 64)
 	if err != nil {
 		return errNotFound
@@ -152,8 +170,31 @@ func (s *Server) poster(w http.ResponseWriter, r *http.Request) error {
 	return serveCached(w, r, p, "image/jpeg", age)
 }
 
+// liveTicket vouches for the visitor, for a WebSocket opened to this server
+// from a page on another domain, which the browser sends without cookies.
+func (s *Server) liveTicket(w http.ResponseWriter, r *http.Request) error {
+	var uid int64
+	if u := userFrom(r); u != nil {
+		uid = u.ID
+	}
+	return writeJSON(w, http.StatusOK, map[string]string{"ticket": s.tickets.issue(visitorFrom(r), uid)})
+}
+
 // walk upgrades to a WebSocket and puts the visitor in the room.
 func (s *Server) walk(w http.ResponseWriter, r *http.Request) error {
+	if t := r.URL.Query().Get("ticket"); t != "" {
+		visitor, uid, ok := s.tickets.check(t)
+		if !ok {
+			return fail(http.StatusUnauthorized, "That room ticket has expired. Reload the page.")
+		}
+		ctx := context.WithValue(r.Context(), visitorKey, visitor)
+		if uid != 0 {
+			if u, err := store.UserByID(ctx, s.pool, uid); err == nil {
+				ctx = context.WithValue(ctx, userKey, u)
+			}
+		}
+		r = r.WithContext(ctx)
+	}
 	e, err := s.loadExhibition(r)
 	if err != nil {
 		return err

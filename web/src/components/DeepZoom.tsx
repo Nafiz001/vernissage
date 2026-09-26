@@ -36,7 +36,14 @@ export function DeepZoom({ id, title, open, onClose }: { id: number; title: stri
         crossOriginPolicy: "Anonymous",
       });
       v.addHandler("open", () => setStatus("ready"));
-      v.addHandler("open-failed", () => setStatus("error"));
+      // Without tiles (a server handing pictures to a CDN), fall back to
+      // one large picture in the same viewer.
+      let fellBack = false;
+      v.addHandler("open-failed", () => {
+        if (fellBack) return setStatus("error");
+        fellBack = true;
+        v.open({ type: "image", url: `/img/${id}/2400.jpg`, crossOriginPolicy: "Anonymous" } as never);
+      });
       viewer = v;
     });
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && close();

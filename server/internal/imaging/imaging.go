@@ -43,8 +43,9 @@ var Widths = []int{200, 400, 800, 1200, 1600, 2400}
 const (
 	masterMax = 1200
 	largeMax  = 3000
-	// About 64 megapixels in flight at once, roughly 250 MB as RGBA.
-	pixelBudget = 64 << 20
+	// About 64 megapixels in flight at once, roughly 250 MB as RGBA, unless
+	// the server is told otherwise.
+	defaultPixelBudget = 64 << 20
 )
 
 // Source says where a work's pictures live.
@@ -60,12 +61,18 @@ type Service struct {
 	userAgent string
 	flight    singleflight.Group
 	pixels    *semaphore.Weighted
+	budget    int64
 	hostMu    sync.Mutex
 	hosts     map[string]*semaphore.Weighted
 	log       *slog.Logger
 }
 
-func New(dir, userAgent string) (*Service, error) {
+// New opens the cache in dir. pixelBudget caps the pixels decoded at once;
+// 0 means the default.
+func New(dir, userAgent string, pixelBudget int64) (*Service, error) {
+	if pixelBudget <= 0 {
+		pixelBudget = defaultPixelBudget
+	}
 	for _, sub := range []string{"master", "large", "sized", "dzi", "posters"} {
 		if err := os.MkdirAll(filepath.Join(dir, sub), 0o755); err != nil {
 			return nil, err
@@ -76,6 +83,7 @@ func New(dir, userAgent string) (*Service, error) {
 		client:    &http.Client{Timeout: 90 * time.Second},
 		userAgent: userAgent,
 		pixels:    semaphore.NewWeighted(pixelBudget),
+		budget:    pixelBudget,
 		hosts:     map[string]*semaphore.Weighted{},
 		log:       slog.With("component", "imaging"),
 	}, nil
@@ -204,7 +212,7 @@ func (s *Service) fetchDecode(ctx context.Context, rawURL string, maxSide int) (
 		return nil, fmt.Errorf("%w: %v", ErrUnavailable, err)
 	}
 	// Hold pixel budget for the decoded picture while we decode and shrink it.
-	weight := min(int64(cfg.Width)*int64(cfg.Height), pixelBudget)
+	weight := min(int64(cfg.Width)*int64(cfg.Height), s.budget)
 	if err := s.pixels.Acquire(ctx, weight); err != nil {
 		return nil, err
 	}

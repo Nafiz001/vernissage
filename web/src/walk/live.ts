@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { wsURL } from "@/lib/api";
+import { api, wsURL } from "@/lib/api";
 import type { GuestbookEntry } from "@/lib/types";
 import { motion as live, useWalk, type Peer } from "./store";
 
@@ -37,9 +37,17 @@ export function useLive(slug: string) {
     let timer: ReturnType<typeof setTimeout>;
     let last = { x: NaN, z: NaN, yaw: NaN };
 
-    const connect = () => {
+    const connect = async () => {
       set({ status: "connecting" });
-      const ws = new WebSocket(wsURL(`/ws/exhibitions/${encodeURIComponent(slug)}`));
+      // The socket may be on another domain than the page (Vercel and
+      // Render), where the browser won't send our cookies; a short-lived
+      // ticket from the same-origin API says who we are instead.
+      let ticket = "";
+      try {
+        ticket = (await api<{ ticket: string }>("/api/live-ticket")).ticket;
+      } catch {}
+      if (closed) return;
+      const ws = new WebSocket(wsURL(`/ws/exhibitions/${encodeURIComponent(slug)}?ticket=${encodeURIComponent(ticket)}`));
       socket.current = ws;
       ws.onopen = () => {
         retry = 0;

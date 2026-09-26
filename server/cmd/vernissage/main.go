@@ -122,7 +122,7 @@ func ingest(ctx context.Context, cfg config.Config, args []string) error {
 
 func serve(ctx context.Context, cfg config.Config) error {
 	return withDB(ctx, cfg, func(pool *pgxpool.Pool) error {
-		images, err := imaging.New(cfg.CacheDir, cfg.UserAgent)
+		images, err := imaging.New(cfg.CacheDir, cfg.UserAgent, cfg.PixelBudget)
 		if err != nil {
 			return err
 		}

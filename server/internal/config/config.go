@@ -30,11 +30,22 @@ type Config struct {
 	SyncEvery time.Duration
 	// UserAgent identifies the server to the museums' APIs.
 	UserAgent string
+	// Cloudinary, a cloud name, hands picture resizing to Cloudinary's
+	// fetch CDN instead of this server: /img redirects there, and deep zoom
+	// falls back to one large picture. For hosts with little CPU and no disk.
+	Cloudinary string
+	// Secret signs live-room tickets. Empty means a random one per process.
+	Secret string
+	// ProxyHops is how many proxies in front of the server append to
+	// X-Forwarded-For: 1 behind Caddy, 2 behind Vercel and Render.
+	ProxyHops int
+	// PixelBudget caps the pixels being decoded at once.
+	PixelBudget int64
 }
 
 func Load() Config {
 	return Config{
-		Addr:        env("VERNISSAGE_ADDR", "127.0.0.1:8790"),
+		Addr:        env("VERNISSAGE_ADDR", addrFromPort()),
 		DatabaseURL: env("DATABASE_URL", "postgres://vernissage:vernissage@127.0.0.1:5491/vernissage?sslmode=disable"),
 		CacheDir:    env("VERNISSAGE_CACHE", "data/cache"),
 		CacheBudget: int64(envInt("VERNISSAGE_CACHE_MB", 2048)) << 20,
@@ -43,7 +54,20 @@ func Load() Config {
 		Workers:     envInt("VERNISSAGE_WORKERS", 6),
 		SyncEvery:   envDuration("VERNISSAGE_SYNC_EVERY", 0),
 		UserAgent:   env("VERNISSAGE_USER_AGENT", "Vernissage/1.0 (+https://github.com/Nafiz001/vernissage)"),
+		Cloudinary:  env("VERNISSAGE_CLOUDINARY", ""),
+		Secret:      env("VERNISSAGE_SECRET", ""),
+		ProxyHops:   max(1, envInt("VERNISSAGE_PROXY_HOPS", 1)),
+		PixelBudget: int64(max(4, envInt("VERNISSAGE_PIXEL_BUDGET_MP", 64))) << 20,
 	}
+}
+
+// addrFromPort listens where a platform like Render says to, through
+// PORT, or on localhost for development.
+func addrFromPort() string {
+	if p := os.Getenv("PORT"); p != "" {
+		return "0.0.0.0:" + p
+	}
+	return "127.0.0.1:8790"
 }
 
 func env(key, def string) string {

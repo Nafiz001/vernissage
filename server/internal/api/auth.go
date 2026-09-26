@@ -23,7 +23,7 @@ type userJSON struct {
 func meView(u *store.User) userJSON { return userJSON{u.Handle, u.Name, u.Hue, u.Email} }
 
 func (s *Server) signup(w http.ResponseWriter, r *http.Request) error {
-	if !s.authLimit.Allow("signup:" + clientIP(r)) {
+	if !s.authLimit.Allow("signup:" + s.clientIP(r)) {
 		return fail(http.StatusTooManyRequests, "Too many attempts from here. Wait a minute and try again.")
 	}
 	var in struct {
@@ -94,7 +94,7 @@ func (s *Server) login(w http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 	in.Email = strings.TrimSpace(in.Email)
-	if !s.authLimit.Allow("login:"+clientIP(r)) || !s.authLimit.Allow("login:"+strings.ToLower(in.Email)) {
+	if !s.authLimit.Allow("login:"+s.clientIP(r)) || !s.authLimit.Allow("login:"+strings.ToLower(in.Email)) {
 		return fail(http.StatusTooManyRequests, "Too many sign-in attempts. Wait a minute and try again.")
 	}
 	u, err := store.UserByEmail(r.Context(), s.pool, in.Email)

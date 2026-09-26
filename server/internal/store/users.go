@@ -56,6 +56,10 @@ func UserByEmail(ctx context.Context, q db.Querier, email string) (*User, error)
 	return scanUser(q.QueryRow(ctx, `select `+userCols+` from users where lower(email) = lower($1)`, email))
 }
 
+func UserByID(ctx context.Context, q db.Querier, id int64) (*User, error) {
+	return scanUser(q.QueryRow(ctx, `select `+userCols+` from users where id = $1`, id))
+}
+
 func UserByHandle(ctx context.Context, q db.Querier, handle string) (*User, error) {
 	return scanUser(q.QueryRow(ctx, `select `+userCols+` from users where lower(handle) = lower($1)`, handle))
 }
