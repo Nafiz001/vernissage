@@ -10,7 +10,7 @@ import { RectAreaLightUniformsLib } from "three/examples/jsm/lights/RectAreaLigh
 import type { Artwork, Exhibition, Placement, Room } from "@/lib/types";
 import { Artworks } from "./Artworks";
 import { Controls, useFloorWalk } from "./Controls";
-import { FOV, PANEL, VESTIBULE, WALL_T, wallPoint } from "./geometry";
+import { FOV, PANEL, SHEET, VESTIBULE, WALL_T, WIDE, wallPoint } from "./geometry";
 import { LIGHTS, RoomShell, type Lighting } from "./Room";
 import { useWalk } from "./store";
 import { Visitors } from "./Visitors";
@@ -76,22 +76,28 @@ function SpotOn({ from, to, light }: { from: [number, number, number]; to: [numb
 }
 
 /**
- * While the label panel is open on a wide screen, shift the picture left so
- * the work sits in the middle of what's still visible.
+ * While the label panel is open, shift the picture so the work sits in the
+ * middle of what's still visible: left of the panel on a wide screen, above
+ * the sheet on a phone.
  */
 function ViewShift() {
   const viewing = useWalk((s) => s.viewing);
   const { camera, size } = useThree();
-  const off = useRef(0);
+  const off = useRef({ x: 0, y: 0 });
   useFrame((_, dt) => {
-    const target = viewing !== null && size.width > 900 ? PANEL : 0;
-    off.current += (target - off.current) * (1 - Math.exp(-dt * 5));
+    const wide = size.width > WIDE;
+    const tx = viewing !== null && wide ? PANEL : 0;
+    const ty = viewing !== null && !wide ? size.height * SHEET : 0;
+    const k = 1 - Math.exp(-dt * 5);
+    off.current.x += (tx - off.current.x) * k;
+    off.current.y += (ty - off.current.y) * k;
+    const { x, y } = off.current;
     const cam = camera as THREE.PerspectiveCamera;
-    if (Math.abs(off.current) < 0.5) {
+    if (Math.abs(x) < 0.5 && Math.abs(y) < 0.5) {
       if (cam.view?.enabled) cam.clearViewOffset();
       return;
     }
-    cam.setViewOffset(size.width + off.current, size.height, off.current, 0, size.width, size.height);
+    cam.setViewOffset(size.width + x, size.height + y, x, y, size.width, size.height);
   });
   return null;
 }

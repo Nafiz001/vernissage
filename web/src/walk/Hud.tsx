@@ -7,7 +7,7 @@ import { DeepZoom } from "@/components/DeepZoom";
 import { WallLabel } from "@/components/WallLabel";
 import { initials, relativeDays } from "@/lib/format";
 import type { Artwork, Exhibition, Placement, Room } from "@/lib/types";
-import { PANEL, tourOrder, viewingPose, wallPoint } from "./geometry";
+import { tourOrder, viewingPose, visibleView, wallPoint } from "./geometry";
 import { speak } from "./sound";
 import { motion as live, useWalk } from "./store";
 import { EMOJI } from "./Visitors";
@@ -33,9 +33,7 @@ export function Hud({ e, room, placements, works, conn }: { e: Exhibition; room:
     }
     const p = placements.find((q) => q.artworkId === viewing);
     const a = works.get(viewing);
-    const wide = window.innerWidth > 900;
-    const aspect = (window.innerWidth - (wide ? PANEL : 0)) / window.innerHeight;
-    if (p && a) glideTo(viewingPose(room, p, a.hang.w, a.hang.h, aspect));
+    if (p && a) glideTo(viewingPose(room, p, a.hang.w, a.hang.h, visibleView(window.innerWidth, window.innerHeight)));
   }, [viewing]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
@@ -76,19 +74,19 @@ function TopBar({ e, onBook }: { e: Exhibition; onBook: () => void }) {
   return (
     <div className="pointer-events-none absolute inset-x-0 top-0 flex items-start justify-between gap-4 p-4 sm:p-5">
       <div className={`${panel} pointer-events-auto flex items-center gap-3 py-2 pl-2 pr-4`}>
-        <Link href={`/e/${e.slug}`} className="grid h-10 place-items-center rounded-full px-3 hover:bg-white/10" aria-label="Leave the room">
-          ← Leave
+        <Link href={`/e/${e.slug}`} className="flex h-10 items-center gap-1 whitespace-nowrap rounded-full px-3 hover:bg-white/10" aria-label="Leave the room">
+          ←<span className="hidden sm:inline"> Leave</span>
         </Link>
         <div className="hidden min-w-0 sm:block">
           <p className="lettering-sm truncate text-[19px]">{e.title}</p>
           <p className="text-[13px] text-white/60">Curated by {e.owner.name}</p>
         </div>
       </div>
-      <div className={`${panel} pointer-events-auto flex items-center gap-1 p-1.5`}>
+      <div className={`${panel} pointer-events-auto flex items-center gap-1 whitespace-nowrap p-1.5`}>
         <div className="flex items-center pl-2 pr-1" title={people.map((p) => p.name).join(", ")}>
           <div className="flex -space-x-2">
-            {people.slice(0, 5).map((p) => (
-              <span key={p.id} className="grid h-8 w-8 place-items-center rounded-full border-2 border-[#14110f] text-[11px] font-semibold text-white" style={{ background: `hsl(${p.hue} 45% 48%)` }}>
+            {people.slice(0, 5).map((p, i) => (
+              <span key={p.id} className={`h-8 w-8 place-items-center rounded-full border-2 border-[#14110f] text-[11px] font-semibold text-white ${i > 1 ? "hidden sm:grid" : "grid"}`} style={{ background: `hsl(${p.hue} 45% 48%)` }}>
                 {initials(p.name)}
               </span>
             ))}
@@ -100,7 +98,7 @@ function TopBar({ e, onBook }: { e: Exhibition; onBook: () => void }) {
         <button className="h-10 rounded-full px-3 hover:bg-white/10" onClick={onBook}>
           Guestbook
         </button>
-        <button className="h-10 rounded-full px-3 hover:bg-white/10" aria-pressed={sound} onClick={() => setSound(!sound)}>
+        <button className="hidden h-10 rounded-full px-3 hover:bg-white/10 sm:block" aria-pressed={sound} onClick={() => setSound(!sound)}>
           {sound ? "Sound on" : "Sound off"}
         </button>
         <button
@@ -113,7 +111,13 @@ function TopBar({ e, onBook }: { e: Exhibition; onBook: () => void }) {
         <button
           className="h-10 rounded-full px-3 hover:bg-white/10"
           onClick={() => {
-            navigator.clipboard?.writeText(window.location.href);
+            // Straight into the room, beside you.
+            const url = window.location.href;
+            if (navigator.share && window.matchMedia("(pointer: coarse)").matches) {
+              navigator.share({ title: e.title, url }).catch(() => {});
+              return;
+            }
+            navigator.clipboard?.writeText(url);
             setCopied(true);
             setTimeout(() => setCopied(false), 2000);
           }}
@@ -211,10 +215,10 @@ function Viewing({ a, p, order, works }: { a: Artwork; p: Placement; order: Plac
 
   return (
     <motion.aside
-      className={`${panel} pointer-events-auto absolute bottom-4 right-4 top-24 flex w-[min(380px,calc(100vw-2rem))] flex-col overflow-hidden sm:bottom-5 sm:right-5`}
-      initial={{ opacity: 0, x: 30 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: 30 }}
+      className={`${panel} pointer-events-auto absolute inset-x-3 bottom-3 flex h-[46svh] flex-col overflow-hidden min-[901px]:inset-x-auto min-[901px]:bottom-5 min-[901px]:right-5 min-[901px]:top-24 min-[901px]:h-auto min-[901px]:w-[380px]`}
+      initial={{ opacity: 0, y: 30 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 30 }}
       transition={{ duration: 0.4, ease: [0.65, 0, 0.35, 1] }}
       aria-label="The work you're looking at"
     >

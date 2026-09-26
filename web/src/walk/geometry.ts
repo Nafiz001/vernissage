@@ -50,17 +50,33 @@ export interface Pose {
 export const FOV = 62;
 /** Width of the label panel beside a work being looked at, on wide screens. */
 export const PANEL = 410;
+/** On narrow screens the panel is a sheet covering this share of the height. */
+export const SHEET = 0.48;
+export const WIDE = 900;
+
+/**
+ * How much of the view the label panel leaves visible, as widths and
+ * heights in tangent units (a work of height h at distance d spans h/d).
+ * On a wide screen the panel sits to the right and the picture shifts
+ * left; on a phone it's a sheet along the bottom and the picture shifts
+ * up, which also narrows the field of view by the sheet's share.
+ */
+export function visibleView(width: number, height: number) {
+  const full = 2 * Math.tan(((FOV / 2) * Math.PI) / 180); // tangent height of the whole view
+  if (width > WIDE) return { w: (full * (width - PANEL)) / height, h: full };
+  const scale = full / ((1 + SHEET) * height); // tangent units per pixel
+  return { w: width * scale, h: (1 - SHEET) * height * scale };
+}
 
 /**
  * Where to stand to look at a work: far enough that the whole frame, with
  * a little wall round it, fits the part of the screen not covered by the
  * label panel, and never further than the room allows.
  */
-export function viewingPose(room: Room, p: Placement, w: number, h: number, aspect = 1.6): Pose {
+export function viewingPose(room: Room, p: Placement, w: number, h: number, view = { w: 1.9, h: 1.2 }): Pose {
   const f = wallPoint(room, p.wall, p.x);
-  const tanV = Math.tan(((FOV / 2) * Math.PI) / 180);
-  const fitH = (h * 1.35) / (2 * tanV);
-  const fitW = (w * 1.2) / (2 * tanV * aspect);
+  const fitH = (h * 1.35) / view.h;
+  const fitW = (w * 1.2) / view.w;
   const across = p.wall % 2 === 0 ? room.depth : room.width;
   const dist = Math.min(Math.max(fitH, fitW, 1.2), across - 0.9);
   const x = f.x + f.nx * dist;
