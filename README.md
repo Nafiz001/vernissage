@@ -14,6 +14,10 @@ A *vernissage* is an exhibition's opening night.
 
 ![The front page: Sargent's Madame X in its gilt frame on a Salon-red wall](docs/front.jpg)
 
+**[Watch the 80-second tour](docs/tour.mp4)**: looking by colour, one
+painting at real size and up close, then walking into an exhibition where a
+friend is already looking round.
+
 - **Browse** a salon hang of the whole collection. Search by artist, title,
   subject or century, with typos forgiven; or by colour: pick vermilion and
   see the works that are full of it.
@@ -27,7 +31,7 @@ A *vernissage* is an exhibition's opening night.
   an audio guide, see where everyone else is standing, applaud, and sign the
   guestbook on the way out.
 
-![Walking into an exhibition, stopping at a Monet, then on to the next work](docs/walk.gif)
+![Searching by ultramarine, a painting at real size and in deep zoom, then walking into The Colour of Water, where another visitor, Margot, is already inside](docs/tour.gif)
 
 ```console
 $ make setup          # Go modules and npm packages
