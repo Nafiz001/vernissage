@@ -14,7 +14,7 @@ A *vernissage* is an exhibition's opening night.
 
 ![The front page: Sargent's Madame X in its gilt frame on a Salon-red wall](docs/front.jpg)
 
-**[Watch the 80-second tour](docs/tour.mp4)**: looking by colour, one
+**[Download the 80-second tour](docs/tour.mp4)** (MP4, 16 MB): looking by colour, one
 painting at real size and up close, then walking into an exhibition where a
 friend is already looking round.
 
