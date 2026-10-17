@@ -2,6 +2,9 @@
 
 Hang your own exhibition of the world's masterpieces, then open the doors.
 
+**Live at [vernissage-pi.vercel.app](https://vernissage-pi.vercel.app).** Sign in as
+the demo curator (below) or make an account, and walk into an exhibition.
+
 Vernissage gathers over 8,000 paintings, woodblock prints and drawings that
 The Metropolitan Museum of Art and the Cleveland Museum of Art have released
 into the public domain. You browse them the way you'd walk a museum, save the

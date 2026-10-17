@@ -11,6 +11,12 @@
 None of these need a card. Do the steps in order: each needs an address
 from the one before.
 
+The live site runs a variant of this: the web app on Vercel as below, but
+the Go server and PostgreSQL on an Oracle Cloud Always Free server instead
+of Render and Neon, so it never sleeps and deep zoom keeps its tiles. That
+setup lives in
+[Nafiz001/portfolio-deploy](https://github.com/Nafiz001/portfolio-deploy/tree/main/vernissage).
+
 ## 1. Neon: the database
 
 1. Sign up at https://neon.tech and create a project (Postgres 18 if it's
